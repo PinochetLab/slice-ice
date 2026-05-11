@@ -68,6 +68,7 @@ Material:
     m_Floats:
     - _EnableExternalAlpha: 0
     - _OutlineWidth: 0.02
+    - _TileX: 5
     - _ZWrite: 0
     m_Colors:
     - _Color: {r: 0.12570082, g: 0.9622642, b: 0, a: 1}

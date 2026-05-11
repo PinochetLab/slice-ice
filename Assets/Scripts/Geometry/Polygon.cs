@@ -47,19 +47,39 @@ namespace Geometry
 
         public Ricochet GetRicochet(Vector2 position, Vector2 direction)
         {
-            var begin = position + direction * 0.01f;
             var end = position + direction * 1000f;
-            var segment =  new Segment(begin, end);
-            var intersection = GetIntersections(segment).OrderBy(x => x.SegmentX).First();
-            if (intersection == null)
+            var segment =  new Segment(position, end);
+
+            /*Debug.Log("--------");
+            Debug.Log($"position: {position}");
+            Debug.Log($"direction: {direction}");*/
+            
+            var intersections = GetIntersections(segment)
+                .Where(x => x.SegmentX > 0.0001f)
+                .OrderBy(x => x.SegmentX).ToList();
+
+            if (intersections.Count == 0)
             {
+                Debug.Log("--------");
+                Debug.Log($"position: ({position.x}, {position.y})");
+                Debug.Log($"direction: {direction}");
                 throw new Exception("No intersection found.");
             }
+            
+            var intersection = intersections.First();
+            
+            /*Debug.Log($"intersection.Point: {intersection.Point}");
+            Debug.Log($"intersection.Index: {intersection.Index}");
+            Debug.Log($"intersection.SegmentX: {intersection.SegmentX}");
+            Debug.Log($"intersection.EdgeX: {intersection.EdgeX}");*/
+
+            const float dx = 0.5f;
+            
             var distance = intersection.SegmentX;
             var newPosition = intersection.Point;
             var edgeSegment = GetEdge(intersection.Index);
             var e = (edgeSegment.B - edgeSegment.A).normalized;
-            var p = Vector2.Perpendicular(e);
+            var p = new Vector2(e.y, -e.x);
             var newDirection = direction - 2 * Vector2.Dot(direction, p) * p;
             return new Ricochet(distance, newPosition, newDirection);
         }
@@ -154,10 +174,12 @@ namespace Geometry
 
             for (var i = 0; i < vertexCount; i++)
             {
-                if (!Segment.AreIntersected(segment, GetEdge(i), out var intersectionPoint))
+                var edge = GetEdge(i);
+                if (!Segment.AreIntersected(segment, edge, out var intersectionPoint))
                     continue;
                 var edgeX = Vector2.Distance(Vertices[i], intersectionPoint);
-                var segmentX = Vector2.Distance(Vertices[i], intersectionPoint);
+                var segmentX = Vector2.Distance(segment.A, intersectionPoint);
+                //var enter = Vector3.Cross(edge.B - edge.A, segment.A - edge.A).z > 0;
                 yield return new Intersection(edgeX, segmentX, intersectionPoint, i);
             }
         }
@@ -168,7 +190,7 @@ namespace Geometry
             return intersections.Count > 0;
         }
 
-        private bool IsInside(Vector2 point)
+        public bool IsInside(Vector2 point)
         {
             var inside = false;
             var vertexCount = Vertices.Count;

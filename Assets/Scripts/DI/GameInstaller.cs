@@ -1,5 +1,6 @@
+using Levels;
 using Main;
-using Penguins;
+using UIs;
 using UnityEngine;
 using Zenject;
 
@@ -8,25 +9,28 @@ namespace DI
     public class GameInstaller : MonoInstaller
     {
         [SerializeField] private IceController iceController;
-        [SerializeField] private Floe floePrefab;
-        [SerializeField] private Transform floeRoot;
-        [SerializeField] private Penguin penguinPrefab;
-        [SerializeField] private Transform penguinRoot;
-        [SerializeField] private SettingsProvider settingsProvider;
+        [SerializeField] private SmartSpawner smartSpawner;
+        [SerializeField] private ViewMaster viewMaster;
+        [SerializeField] private IceCubeSpawner iceCubeSpawner;
+        [SerializeField] private IceCube iceCubePrefab;
+        [SerializeField] private Transform iceCubeRoot;
+        [SerializeField] private LevelTarget levelTarget;
         
         public override void InstallBindings()
         {
             Container.Bind<IceController>().FromInstance(iceController).AsSingle();
             
-            Container.BindFactory<Floe, Floe.Factory>()
-                .FromComponentInNewPrefab(floePrefab);
-            Container.Bind<Transform>().WithId("FloeRoot").FromInstance(floeRoot).AsCached();
+            Container.Bind<SmartSpawner>().FromInstance(smartSpawner).AsSingle();
             
-            Container.BindFactory<Penguin, Penguin.Factory>()
-                .FromComponentInNewPrefab(penguinPrefab);
-            Container.Bind<Transform>().WithId("PenguinRoot").FromInstance(penguinRoot).AsCached();
+            Container.Bind<ViewMaster>().FromInstance(viewMaster).AsSingle();
             
-            Container.Bind<SettingsProvider>().FromInstance(settingsProvider).AsSingle();
+            Container.Bind<IceCubeSpawner>().FromInstance(iceCubeSpawner).AsSingle();
+            
+            Container.Bind<LevelTarget>().FromInstance(levelTarget).AsSingle();
+            
+            Container.BindFactory<IceCube, IceCube.Factory>()
+                .FromComponentInNewPrefab(iceCubePrefab);
+            Container.Bind<Transform>().WithId("IceCubeRoot").FromInstance(iceCubeRoot).AsCached();
         }
     }
 }
